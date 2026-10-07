@@ -40,6 +40,7 @@ The language can be changed with one large button and the choice is remembered o
 - Large mobile-friendly controls
 - Set-by-set checkboxes
 - Last-performed date stored automatically for each exercise
+- Animated in-card exercise demonstrations for matched movements
 - Workout completion button
 - Progress and language choice stored locally
 - No account or database required
@@ -65,3 +66,12 @@ Never hold your breath while lifting. Stop exercising and seek appropriate medic
 ---
 
 Made with ❤️ for Papa.
+
+
+## Exercise Artwork
+
+Exercise illustrations are provided by the open-source [Workout Guide](https://github.com/bryllim/workout-guide) project by Bryl Lim, based in part on artwork by Everkinetic.
+
+The visual assets are licensed under **CC BY-SA 4.0**. TrainWithPapa loads the three published SVG frames for matched exercises and cycles them in the exercise card to create a lightweight demonstration animation.
+
+Exercises without an exact reviewed visual match intentionally show a placeholder rather than an incorrect demonstration.
