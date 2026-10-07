@@ -39,6 +39,7 @@ The language can be changed with one large button and the choice is remembered o
 - Previous / next day navigation
 - Large mobile-friendly controls
 - Set-by-set checkboxes
+- Last-performed date stored automatically for each exercise
 - Workout completion button
 - Progress and language choice stored locally
 - No account or database required
