@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: Inter, "Noto Sans Gurmukhi", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -34,16 +34,35 @@ footer {
   margin: 0 auto;
 }
 
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: start;
+}
+
+.language-toggle {
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  min-width: 92px;
+  min-height: 46px;
+  padding: 9px 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 6px; font-size: clamp(1.75rem, 6vw, 2.4rem); }
-h2 { margin: 8px 0 8px; font-size: clamp(2rem, 8vw, 3rem); }
+h2 { margin: 8px 0 8px; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.1; }
 h3 { margin-bottom: 0; font-size: 1.25rem; }
 
 .eyebrow {
   margin-bottom: 4px;
   font-size: .72rem;
   font-weight: 800;
-  letter-spacing: .12em;
+  letter-spacing: .1em;
   opacity: .72;
 }
 
@@ -86,7 +105,7 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
 
 .nav-btn { font-size: 1.3rem; }
 
-.hero-card, .section-card, .exercise-card, .tip-card {
+.hero-card, .section-card, .exercise-card, .tip-card, .breathing-card {
   background: var(--card);
   border-radius: 20px;
   box-shadow: var(--shadow);
@@ -98,12 +117,25 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
   justify-content: space-between;
   gap: 16px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .hero-card p { margin: 0; color: var(--muted); line-height: 1.55; }
-
 .hero-emoji { font-size: 4rem; }
+
+.breathing-card {
+  display: flex;
+  gap: 14px;
+  align-items: start;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  background: #effaf4;
+  border: 1px solid #ccebd8;
+}
+
+.breathing-icon { font-size: 1.65rem; }
+.breathing-card strong { display: block; margin-bottom: 4px; color: #166534; }
+.breathing-card p { margin: 0; color: #466653; line-height: 1.45; }
 
 .pill, .count-pill {
   display: inline-block;
@@ -138,21 +170,21 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 48px;
-  padding: 10px 12px;
+  min-height: 50px;
+  padding: 11px 12px;
   background: #f8fafc;
   border-radius: 12px;
 }
 
 .simple-row input,
 .set-check input {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   accent-color: var(--accent);
   flex: 0 0 auto;
 }
 
-.simple-row span { line-height: 1.35; }
+.simple-row span { line-height: 1.4; }
 
 .section-heading {
   display: flex;
@@ -163,25 +195,20 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
 
 .exercise-list { display: grid; gap: 14px; }
 
-.exercise-card {
-  overflow: hidden;
-}
+.exercise-card { overflow: hidden; }
 
-.exercise-main {
-  padding: 20px;
-}
+.exercise-main { padding: 20px; }
 
 .exercise-top {
   display: flex;
-  justify-content: space-between;
   gap: 14px;
   align-items: start;
 }
 
 .exercise-number {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   border-radius: 50%;
   background: var(--accent);
   color: white;
@@ -190,25 +217,23 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
   font-weight: 900;
 }
 
-.exercise-name {
-  flex: 1;
-}
+.exercise-name { flex: 1; }
 
 .exercise-name h4 {
-  margin: 0 0 4px;
-  font-size: 1.18rem;
+  margin: 0 0 6px;
+  font-size: 1.2rem;
 }
 
 .exercise-name p {
   margin: 0;
   color: var(--muted);
-  font-size: .92rem;
-  line-height: 1.45;
+  font-size: .94rem;
+  line-height: 1.5;
 }
 
 .sets {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
   gap: 8px;
   margin-top: 16px;
 }
@@ -237,27 +262,37 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
   background: #f1f5f9;
   color: #475569;
   border-radius: 999px;
-  padding: 6px 9px;
-  font-size: .8rem;
+  padding: 7px 10px;
+  font-size: .82rem;
   font-weight: 700;
 }
 
-.alt {
+.how, .alt {
   border-top: 1px solid var(--line);
   padding: 14px 20px;
   background: #fbfdff;
 }
 
-.alt summary {
+.alt { background: #f7fbff; }
+
+.how summary, .alt summary {
   cursor: pointer;
   font-weight: 800;
   color: var(--accent);
 }
 
+.how ol {
+  margin: 10px 0 0 18px;
+  padding: 0;
+  color: var(--muted);
+}
+
+.how li { margin: 7px 0; line-height: 1.45; }
+
 .alt p {
   margin: 10px 0 0;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .tip-card {
@@ -273,19 +308,17 @@ h3 { margin-bottom: 0; font-size: 1.25rem; }
   width: 100%;
   border: 0;
   margin-top: 16px;
-  min-height: 58px;
+  min-height: 60px;
   border-radius: 16px;
   background: #16a34a;
   color: white;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 900;
   cursor: pointer;
   box-shadow: var(--shadow);
 }
 
-.finish-btn.done {
-  background: var(--success);
-}
+.finish-btn.done { background: var(--success); }
 
 .done-message {
   text-align: center;
@@ -301,6 +334,14 @@ footer {
   font-size: .88rem;
 }
 
+body[data-lang="pa"] {
+  line-height: 1.55;
+}
+
+body[data-lang="pa"] .eyebrow {
+  letter-spacing: 0;
+}
+
 @media (max-width: 560px) {
   .app-header { padding-top: 22px; }
   .app-shell { width: min(100% - 20px, 760px); }
@@ -308,5 +349,6 @@ footer {
   .day-tab { min-height: 42px; font-size: .72rem; }
   .hero-card { padding: 20px; }
   .hero-emoji { font-size: 3rem; }
-  .sets { grid-template-columns: repeat(3, 1fr); }
+  .header-row { gap: 10px; }
+  .language-toggle { min-width: 82px; padding-inline: 10px; }
 }
