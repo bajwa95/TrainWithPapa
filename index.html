@@ -10,10 +10,16 @@
 </head>
 <body>
   <header class="app-header">
-    <div>
-      <p class="eyebrow">TRAIN WITH PAPA</p>
-      <h1>Today's Workout 💪</h1>
-      <p id="todayDate" class="date"></p>
+    <div class="header-row">
+      <div>
+        <p class="eyebrow">TRAIN WITH PAPA</p>
+        <h1 id="pageTitle">Today's Workout 💪</h1>
+        <p id="todayDate" class="date"></p>
+      </div>
+
+      <button id="languageToggle" class="language-toggle" type="button" aria-label="Switch language">
+        ਪੰਜਾਬੀ
+      </button>
     </div>
   </header>
 
@@ -24,7 +30,7 @@
       <button id="nextDay" class="nav-btn" aria-label="Next day">→</button>
     </section>
 
-    <section id="heroCard" class="hero-card">
+    <section class="hero-card">
       <div>
         <span id="dayLabel" class="pill"></span>
         <h2 id="muscleGroup"></h2>
@@ -33,51 +39,57 @@
       <div id="heroEmoji" class="hero-emoji" aria-hidden="true"></div>
     </section>
 
-    <section id="warmupSection" class="section-card">
+    <section class="breathing-card">
+      <span class="breathing-icon">💨</span>
+      <div>
+        <strong id="breathingTitle">Keep breathing, Papa</strong>
+        <p id="breathingText">Breathe out during the effort and breathe in as you return. Never hold your breath while lifting.</p>
+      </div>
+    </section>
+
+    <section class="section-card">
       <div class="section-title">
         <span>🔥</span>
         <div>
-          <p class="eyebrow">START HERE</p>
-          <h3>Warm-Up</h3>
+          <p id="startHereLabel" class="eyebrow">START HERE</p>
+          <h3 id="warmupTitle">Warm-Up</h3>
         </div>
       </div>
       <div id="warmupList" class="simple-list"></div>
     </section>
 
-    <section id="workoutSection">
+    <section>
       <div class="section-heading">
         <div>
-          <p class="eyebrow">MAIN WORKOUT</p>
-          <h3>Exercises</h3>
+          <p id="mainWorkoutLabel" class="eyebrow">MAIN WORKOUT</p>
+          <h3 id="exercisesTitle">Exercises</h3>
         </div>
         <span id="exerciseCount" class="count-pill"></span>
       </div>
       <div id="exerciseList" class="exercise-list"></div>
     </section>
 
-    <section id="stretchSection" class="section-card">
+    <section class="section-card">
       <div class="section-title">
         <span>🧘</span>
         <div>
-          <p class="eyebrow">FINISH EASY</p>
-          <h3>Stretching</h3>
+          <p id="finishEasyLabel" class="eyebrow">FINISH EASY</p>
+          <h3 id="stretchTitle">Cool Down & Stretch</h3>
         </div>
       </div>
       <div id="stretchList" class="simple-list"></div>
     </section>
 
     <section class="tip-card">
-      <strong>👂 Papa's rule:</strong>
-      <span>Use a weight you can control. Stop if you feel sharp pain, dizziness, chest pain, or unusual shortness of breath.</span>
+      <strong id="papaRuleTitle">👂 Papa's rule:</strong>
+      <span id="papaRuleText">Use a weight you can control and finish with 2–3 good reps still possible. Stop for sharp pain, chest pain, faintness, severe dizziness, or unusual shortness of breath.</span>
     </section>
 
     <button id="finishWorkout" class="finish-btn">✓ Workout Done</button>
     <p id="doneMessage" class="done-message" hidden>Great work, Papa! 👏 See you next workout.</p>
   </main>
 
-  <footer>
-    Made with ❤️ for Papa
-  </footer>
+  <footer id="footerText">Made with ❤️ for Papa</footer>
 
   <script src="script.js"></script>
 </body>
