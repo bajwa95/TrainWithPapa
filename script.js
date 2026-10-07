@@ -19,7 +19,9 @@ const ui = {
     lastDone: "Last done",
     neverDone: "Not done yet",
     demo: "Exercise demo",
-    visualUnavailable: "Demo not available yet",
+    visualUnavailable: "Visual guide coming soon",
+    switchAlternative: "↪ Use Alternate Exercise",
+    showMain: "↩ Use Main Exercise",
     done: "✓ Workout Done",
     completed: "✓ Workout Completed",
     doneMessage: "Great work, Papa! 👏 See you next workout.",
@@ -46,7 +48,9 @@ const ui = {
     lastDone: "ਪਿਛਲੀ ਵਾਰ",
     neverDone: "ਹਾਲੇ ਨਹੀਂ ਕੀਤੀ",
     demo: "ਕਸਰਤ ਦੀ ਚਲਦੀ ਤਸਵੀਰ",
-    visualUnavailable: "ਇਸ ਕਸਰਤ ਦੀ ਤਸਵੀਰ ਹਾਲੇ ਉਪਲਬਧ ਨਹੀਂ",
+    visualUnavailable: "ਇਸ ਕਸਰਤ ਦੀ ਤਸਵੀਰ ਜਲਦੀ ਜੋੜੀ ਜਾਵੇਗੀ",
+    switchAlternative: "↪ ਬਦਲਵੀਂ ਕਸਰਤ ਵਰਤੋ",
+    showMain: "↩ ਮੁੱਖ ਕਸਰਤ ਵਰਤੋ",
     done: "✓ ਕਸਰਤ ਪੂਰੀ",
     completed: "✓ ਅੱਜ ਦੀ ਕਸਰਤ ਹੋ ਗਈ",
     doneMessage: "ਸ਼ਾਬਾਸ਼ ਪਾਪਾ! 👏 ਅਗਲੀ ਕਸਰਤ ਵਿੱਚ ਮਿਲਦੇ ਹਾਂ।",
@@ -55,64 +59,240 @@ const ui = {
   }
 };
 
-const EXERCISE_MEDIA = {
-  "Easy Walk": "walking",
-  "Comfortable Walk": "walking",
-  "Machine Chest Press": "machine-chest-press",
-  "Pec Deck / Chest Fly": "pec-deck",
-  "Rope Triceps Pushdown": "rope-tricep-pushdown",
-  "Lat Pulldown": "lat-pulldown",
-  "Seated Cable Row": "seated-row",
-  "Chest-Supported Row": "chest-supported-row",
-  "Cable Biceps Curl": "cable-curl",
-  "Leg Press": "leg-press",
-  "Seated Leg Curl": "seated-leg-curl",
-  "Leg Extension": "leg-extension",
-  "Standing Calf Raise": "standing-calf-raise",
-  "Machine Shoulder Press": "machine-shoulder-press",
-  "Dumbbell Lateral Raise": "lateral-raise",
-  "Reverse Pec Deck": "reverse-pec-deck",
-  "Dead Bug": "dead-bug",
-  "Hammer Curl": "hammer-curl"
+const PRIMARY_IMAGES = {
+  "Easy Walk": "images/exercises/walking.svg",
+  "Comfortable Walk": "images/exercises/walking.svg",
+  "Supported Balance Hold": "images/exercises/placeholder.svg",
+  "Machine Chest Press": "images/exercises/machine-chest-press.svg",
+  "Incline Chest Press Machine": "images/exercises/placeholder.svg",
+  "Pec Deck / Chest Fly": "images/exercises/pec-deck.svg",
+  "Rope Triceps Pushdown": "images/exercises/rope-tricep-pushdown.svg",
+  "Lat Pulldown": "images/exercises/lat-pulldown.svg",
+  "Seated Cable Row": "images/exercises/seated-row.svg",
+  "Chest-Supported Row": "images/exercises/chest-supported-row.svg",
+  "Cable Biceps Curl": "images/exercises/cable-curl.svg",
+  "Supported Single-Leg Stand": "images/exercises/placeholder.svg",
+  "Sit-to-Stand": "images/exercises/placeholder.svg",
+  "Leg Press": "images/exercises/leg-press.svg",
+  "Seated Leg Curl": "images/exercises/seated-leg-curl.svg",
+  "Leg Extension": "images/exercises/leg-extension.svg",
+  "Standing Calf Raise": "images/exercises/standing-calf-raise.svg",
+  "Machine Shoulder Press": "images/exercises/machine-shoulder-press.svg",
+  "Dumbbell Lateral Raise": "images/exercises/lateral-raise.svg",
+  "Reverse Pec Deck": "images/exercises/reverse-pec-deck.svg",
+  "Dead Bug": "images/exercises/dead-bug.svg",
+  "Hammer Curl": "images/exercises/hammer-curl.svg"
 };
 
-const EXERCISE_MEDIA_BASE =
-  "https://cdn.jsdelivr.net/npm/@bryllim/workout-guide@1.0.0/assets";
+const MUSCLE_IMAGES = {
+  "Chest + Light Triceps": "images/muscles/chest-triceps.svg",
+  "Back + Light Biceps": "images/muscles/back-biceps.svg",
+  "Recovery + Walking + Balance": "images/muscles/recovery.svg",
+  "Legs": "images/muscles/legs.svg",
+  "Shoulders + Light Core": "images/muscles/shoulders-core.svg",
+  "Arms + Walking": "images/muscles/arms.svg",
+  "Recovery + Stretching": "images/muscles/recovery.svg"
+};
 
-const EXERCISE_FRAME_SEQUENCE = [1, 2, 3, 2];
-let exerciseAnimationTimer = null;
-
-function exerciseFrameUrl(slug, frame) {
-  return `${EXERCISE_MEDIA_BASE}/${slug}/frame-${frame}.svg`;
+function makeAlt(nameEn, namePa, image, repsEn, repsPa, tipEn, tipPa, howEn, howPa, options = {}) {
+  return {
+    name: { en: nameEn, pa: namePa },
+    image: image || "images/exercises/placeholder.svg",
+    sets: options.sets ?? 2,
+    reps: { en: repsEn, pa: repsPa },
+    rest: {
+      en: options.restEn || "60 sec",
+      pa: options.restPa || "60 ਸਕਿੰਟ"
+    },
+    tip: { en: tipEn, pa: tipPa },
+    how: howEn.map((en, i) => ({ en, pa: howPa[i] }))
+  };
 }
 
-function stopExerciseAnimations() {
-  if (exerciseAnimationTimer) {
-    clearInterval(exerciseAnimationTimer);
-    exerciseAnimationTimer = null;
-  }
+const ALTERNATE_EXERCISES = {
+  "Easy Walk": makeAlt(
+    "Stationary Bike", "ਸਟੇਸ਼ਨਰੀ ਬਾਈਕ", null,
+    "15–20 min", "15–20 ਮਿੰਟ",
+    "Keep the resistance easy and pedal smoothly.", "ਰਜ਼ਿਸਟੈਂਸ ਹਲਕੀ ਰੱਖੋ ਅਤੇ ਆਰਾਮ ਨਾਲ ਪੈਡਲ ਕਰੋ।",
+    ["Adjust the seat so the knee stays slightly bent.", "Pedal at a comfortable pace.", "Keep breathing normally."],
+    ["ਸੀਟ ਇਸ ਤਰ੍ਹਾਂ ਸੈੱਟ ਕਰੋ ਕਿ ਘੁੱਟਣਾ ਹਲਕਾ ਮੋੜਿਆ ਰਹੇ।", "ਆਰਾਮਦਾਇਕ ਰਫ਼ਤਾਰ ਨਾਲ ਪੈਡਲ ਕਰੋ।", "ਸਧਾਰਣ ਸਾਹ ਲੈਂਦੇ ਰਹੋ।"],
+    { sets: 1, restEn: "Easy", restPa: "ਆਰਾਮ ਨਾਲ" }
+  ),
+  "Comfortable Walk": makeAlt(
+    "Stationary Bike", "ਸਟੇਸ਼ਨਰੀ ਬਾਈਕ", null,
+    "15–20 min", "15–20 ਮਿੰਟ",
+    "Keep the resistance easy and pedal smoothly.", "ਰਜ਼ਿਸਟੈਂਸ ਹਲਕੀ ਰੱਖੋ ਅਤੇ ਆਰਾਮ ਨਾਲ ਪੈਡਲ ਕਰੋ।",
+    ["Adjust the seat comfortably.", "Pedal at an easy steady pace.", "Slow down if breathing becomes difficult."],
+    ["ਸੀਟ ਆਰਾਮ ਨਾਲ ਸੈੱਟ ਕਰੋ।", "ਹੌਲੀ ਅਤੇ ਸਥਿਰ ਰਫ਼ਤਾਰ ਨਾਲ ਪੈਡਲ ਕਰੋ।", "ਜੇ ਸਾਹ ਲੈਣਾ ਔਖਾ ਹੋਵੇ ਤਾਂ ਰਫ਼ਤਾਰ ਘਟਾਓ।"],
+    { sets: 1, restEn: "Easy", restPa: "ਆਰਾਮ ਨਾਲ" }
+  ),
+  "Supported Balance Hold": makeAlt(
+    "Heel-to-Toe Stand", "ਐੜੀ-ਤੋਂ-ਪੈਰ ਅੱਗੇ ਰੱਖ ਕੇ ਖੜ੍ਹਨਾ", null,
+    "20 sec each side", "ਹਰ ਪਾਸੇ 20 ਸਕਿੰਟ",
+    "Stay close to a wall or rail.", "ਦੀਵਾਰ ਜਾਂ ਰੇਲ ਦੇ ਨੇੜੇ ਰਹੋ।",
+    ["Place one foot directly in front of the other.", "Keep one hand near support.", "Look forward and hold steadily."],
+    ["ਇੱਕ ਪੈਰ ਦੂਜੇ ਦੇ ਬਿਲਕੁਲ ਅੱਗੇ ਰੱਖੋ।", "ਇੱਕ ਹੱਥ ਸਹਾਰੇ ਦੇ ਨੇੜੇ ਰੱਖੋ।", "ਅੱਗੇ ਵੇਖੋ ਅਤੇ ਸਥਿਰ ਖੜ੍ਹੇ ਰਹੋ।"],
+    { restEn: "30 sec", restPa: "30 ਸਕਿੰਟ" }
+  ),
+  "Supported Single-Leg Stand": makeAlt(
+    "Heel-to-Toe Stand", "ਐੜੀ-ਤੋਂ-ਪੈਰ ਅੱਗੇ ਰੱਖ ਕੇ ਖੜ੍ਹਨਾ", null,
+    "20 sec each side", "ਹਰ ਪਾਸੇ 20 ਸਕਿੰਟ",
+    "Stay close to a wall or rail.", "ਦੀਵਾਰ ਜਾਂ ਰੇਲ ਦੇ ਨੇੜੇ ਰਹੋ।",
+    ["Place one foot directly in front of the other.", "Keep one hand near support.", "Look forward and hold steadily."],
+    ["ਇੱਕ ਪੈਰ ਦੂਜੇ ਦੇ ਬਿਲਕੁਲ ਅੱਗੇ ਰੱਖੋ।", "ਇੱਕ ਹੱਥ ਸਹਾਰੇ ਦੇ ਨੇੜੇ ਰੱਖੋ।", "ਅੱਗੇ ਵੇਖੋ ਅਤੇ ਸਥਿਰ ਖੜ੍ਹੇ ਰਹੋ।"],
+    { restEn: "30 sec", restPa: "30 ਸਕਿੰਟ" }
+  ),
+  "Machine Chest Press": makeAlt(
+    "Dumbbell Bench Press", "ਡੰਬਲ ਬੈਂਚ ਪ੍ਰੈੱਸ", "images/exercises/dumbbell-bench-press.svg",
+    "10 reps", "10 ਰੈਪ",
+    "Use light dumbbells and keep the movement controlled.", "ਹਲਕੇ ਡੰਬਲ ਵਰਤੋ ਅਤੇ ਮੂਵਮੈਂਟ ਕੰਟਰੋਲ ਨਾਲ ਕਰੋ।",
+    ["Sit on the bench with dumbbells close to the chest.", "Lie back with feet flat on the floor.", "Press up while breathing out, then lower slowly."],
+    ["ਡੰਬਲ ਛਾਤੀ ਦੇ ਨੇੜੇ ਰੱਖ ਕੇ ਬੈਂਚ ਤੇ ਬੈਠੋ।", "ਪਿੱਛੇ ਲੇਟੋ ਅਤੇ ਪੈਰ ਜ਼ਮੀਨ ਤੇ ਰੱਖੋ।", "ਸਾਹ ਬਾਹਰ ਕੱਢਦੇ ਹੋਏ ਉੱਪਰ ਧੱਕੋ ਅਤੇ ਹੌਲੀ ਹੇਠਾਂ ਲਿਆਓ।"],
+    { restEn: "75–90 sec", restPa: "75–90 ਸਕਿੰਟ" }
+  ),
+  "Incline Chest Press Machine": makeAlt(
+    "Incline Dumbbell Press", "ਇਨਕਲਾਈਨ ਡੰਬਲ ਪ੍ਰੈੱਸ", "images/exercises/incline-dumbbell-press.svg",
+    "10 reps", "10 ਰੈਪ",
+    "Keep the bench angle moderate and use light dumbbells.", "ਬੈਂਚ ਦਾ ਐਂਗਲ ਮੱਧਮ ਰੱਖੋ ਅਤੇ ਹਲਕੇ ਡੰਬਲ ਵਰਤੋ।",
+    ["Set the bench to a moderate incline.", "Keep feet flat and shoulders supported.", "Press smoothly, then lower with control."],
+    ["ਬੈਂਚ ਨੂੰ ਮੱਧਮ ਇਨਕਲਾਈਨ ਤੇ ਸੈੱਟ ਕਰੋ।", "ਪੈਰ ਜ਼ਮੀਨ ਤੇ ਅਤੇ ਮੋਢੇ ਸਹਾਰੇ ਨਾਲ ਰੱਖੋ।", "ਹੌਲੀ ਉੱਪਰ ਪ੍ਰੈੱਸ ਕਰੋ ਅਤੇ ਕੰਟਰੋਲ ਨਾਲ ਹੇਠਾਂ ਲਿਆਓ।"],
+    { restEn: "75–90 sec", restPa: "75–90 ਸਕਿੰਟ" }
+  ),
+  "Pec Deck / Chest Fly": makeAlt(
+    "Cable Chest Fly", "ਕੇਬਲ ਚੈਸਟ ਫਲਾਈ", "images/exercises/cable-fly.svg",
+    "10–12 reps", "10–12 ਰੈਪ",
+    "Use light resistance and a comfortable range.", "ਹਲਕਾ ਰਜ਼ਿਸਟੈਂਸ ਵਰਤੋ ਅਤੇ ਆਰਾਮਦਾਇਕ ਰੇਂਜ ਵਿੱਚ ਕਰੋ।",
+    ["Set the handles around chest height.", "Keep a small bend in the elbows.", "Bring the hands together slowly, then return with control."],
+    ["ਹੈਂਡਲ ਛਾਤੀ ਦੇ ਲੈਵਲ ਦੇ ਨੇੜੇ ਸੈੱਟ ਕਰੋ।", "ਕੋਹਣੀਆਂ ਵਿੱਚ ਹਲਕਾ ਮੋੜ ਰੱਖੋ।", "ਹੱਥ ਹੌਲੀ ਇਕੱਠੇ ਲਿਆਓ ਅਤੇ ਕੰਟਰੋਲ ਨਾਲ ਵਾਪਸ ਜਾਓ।"]
+  ),
+  "Rope Triceps Pushdown": makeAlt(
+    "Straight-Bar Triceps Pushdown", "ਸਟ੍ਰੇਟ-ਬਾਰ ਟ੍ਰਾਈਸੈਪਸ ਪੁਸ਼ਡਾਊਨ", "images/exercises/tricep-pushdown.svg",
+    "10–12 reps", "10–12 ਰੈਪ",
+    "Keep the elbows beside the body.", "ਕੋਹਣੀਆਂ ਸਰੀਰ ਦੇ ਨਾਲ ਰੱਖੋ।",
+    ["Stand tall facing the cable.", "Keep elbows tucked in.", "Push the bar down while breathing out and return slowly."],
+    ["ਕੇਬਲ ਵੱਲ ਮੂੰਹ ਕਰਕੇ ਸਿੱਧੇ ਖੜ੍ਹੋ।", "ਕੋਹਣੀਆਂ ਅੰਦਰ ਰੱਖੋ।", "ਸਾਹ ਬਾਹਰ ਕੱਢਦੇ ਹੋਏ ਬਾਰ ਹੇਠਾਂ ਧੱਕੋ ਅਤੇ ਹੌਲੀ ਵਾਪਸ ਲਿਆਓ।"]
+  ),
+  "Lat Pulldown": makeAlt(
+    "Assisted Pull-Up", "ਅਸਿਸਟਡ ਪੁਲ-ਅੱਪ", "images/exercises/assisted-pull-up.svg",
+    "8–10 reps", "8–10 ਰੈਪ",
+    "Use enough assistance to keep every rep smooth.", "ਇੰਨੀ ਸਹਾਇਤਾ ਵਰਤੋ ਕਿ ਹਰ ਰੈਪ ਆਰਾਮ ਨਾਲ ਹੋਵੇ।",
+    ["Set the assistance before stepping on.", "Grip the handles and keep the chest tall.", "Pull up smoothly and lower slowly."],
+    ["ਮਸ਼ੀਨ ਤੇ ਚੜ੍ਹਣ ਤੋਂ ਪਹਿਲਾਂ ਸਹਾਇਤਾ ਸੈੱਟ ਕਰੋ।", "ਹੈਂਡਲ ਫੜੋ ਅਤੇ ਛਾਤੀ ਉੱਪਰ ਰੱਖੋ।", "ਹੌਲੀ ਉੱਪਰ ਖਿੱਚੋ ਅਤੇ ਕੰਟਰੋਲ ਨਾਲ ਹੇਠਾਂ ਆਓ।"],
+    { restEn: "75–90 sec", restPa: "75–90 ਸਕਿੰਟ" }
+  ),
+  "Seated Cable Row": makeAlt(
+    "Chest-Supported Row", "ਚੈਸਟ-ਸਪੋਰਟਡ ਰੋ", "images/exercises/chest-supported-row.svg",
+    "10–12 reps", "10–12 ਰੈਪ",
+    "Let the pad support your chest.", "ਪੈਡ ਨੂੰ ਛਾਤੀ ਦਾ ਸਹਾਰਾ ਲੈਣ ਦਿਓ।",
+    ["Adjust the seat so the chest rests comfortably on the pad.", "Pull the elbows back without shrugging.", "Return slowly."],
+    ["ਸੀਟ ਇਸ ਤਰ੍ਹਾਂ ਸੈੱਟ ਕਰੋ ਕਿ ਛਾਤੀ ਪੈਡ ਤੇ ਆਰਾਮ ਨਾਲ ਟਿਕੇ।", "ਮੋਢੇ ਚੁੱਕੇ ਬਿਨਾਂ ਕੋਹਣੀਆਂ ਪਿੱਛੇ ਖਿੱਚੋ।", "ਹੌਲੀ ਵਾਪਸ ਜਾਓ।"],
+    { restEn: "75–90 sec", restPa: "75–90 ਸਕਿੰਟ" }
+  ),
+  "Chest-Supported Row": makeAlt(
+    "Single-Arm Cable Row", "ਇੱਕ ਬਾਂਹ ਕੇਬਲ ਰੋ", "images/exercises/single-arm-cable-row.svg",
+    "10 each side", "ਹਰ ਪਾਸੇ 10 ਰੈਪ",
+    "Keep the torso still while one arm rows.", "ਇੱਕ ਬਾਂਹ ਖਿੱਚਦੇ ਸਮੇਂ ਧੜ ਸਥਿਰ ਰੱਖੋ।",
+    ["Stand or sit tall facing the cable.", "Pull one elbow back toward the ribs.", "Return slowly, then repeat on the other side."],
+    ["ਕੇਬਲ ਵੱਲ ਮੂੰਹ ਕਰਕੇ ਸਿੱਧੇ ਬੈਠੋ ਜਾਂ ਖੜ੍ਹੋ।", "ਇੱਕ ਕੋਹਣੀ ਪੱਸਲੀਆਂ ਵੱਲ ਪਿੱਛੇ ਖਿੱਚੋ।", "ਹੌਲੀ ਵਾਪਸ ਜਾਓ ਅਤੇ ਦੂਜੇ ਪਾਸੇ ਕਰੋ।"]
+  ),
+  "Cable Biceps Curl": makeAlt(
+    "Dumbbell Biceps Curl", "ਡੰਬਲ ਬਾਈਸੈਪਸ ਕਰਲ", "images/exercises/bicep-curl.svg",
+    "10–12 reps", "10–12 ਰੈਪ",
+    "Keep the elbows close and avoid swinging.", "ਕੋਹਣੀਆਂ ਨੇੜੇ ਰੱਖੋ ਅਤੇ ਸਰੀਰ ਨਾ ਝੁਲਾਓ।",
+    ["Stand tall holding light dumbbells.", "Curl without moving the upper arms.", "Lower the dumbbells slowly."],
+    ["ਹਲਕੇ ਡੰਬਲ ਫੜ ਕੇ ਸਿੱਧੇ ਖੜ੍ਹੋ।", "ਉੱਪਰੀ ਬਾਂਹਾਂ ਹਿਲਾਏ ਬਿਨਾਂ ਕਰਲ ਕਰੋ।", "ਡੰਬਲ ਹੌਲੀ ਹੇਠਾਂ ਲਿਆਓ।"]
+  ),
+  "Sit-to-Stand": makeAlt(
+    "Supported Mini Squat", "ਸਹਾਰੇ ਨਾਲ ਹਲਕਾ ਸਕਵਾਟ", null,
+    "8 reps", "8 ਰੈਪ",
+    "Hold a sturdy support and use a small comfortable range.", "ਮਜ਼ਬੂਤ ਸਹਾਰਾ ਫੜੋ ਅਤੇ ਛੋਟੀ ਆਰਾਮਦਾਇਕ ਰੇਂਜ ਵਰਤੋ।",
+    ["Stand holding a rail or stable support.", "Push the hips slightly back and bend the knees a little.", "Stand tall again without rushing."],
+    ["ਰੇਲ ਜਾਂ ਮਜ਼ਬੂਤ ਸਹਾਰਾ ਫੜ ਕੇ ਖੜ੍ਹੋ।", "ਹਿੱਪ ਥੋੜ੍ਹੇ ਪਿੱਛੇ ਕਰਕੇ ਘੁੱਟਣੇ ਹਲਕੇ ਮੋੜੋ।", "ਬਿਨਾਂ ਜਲਦੀ ਕੀਤੇ ਮੁੜ ਸਿੱਧੇ ਖੜ੍ਹੋ।"]
+  ),
+  "Leg Press": makeAlt(
+    "Goblet Squat", "ਗੋਬਲੈਟ ਸਕਵਾਟ", "images/exercises/goblet-squat.svg",
+    "10 reps", "10 ਰੈਪ",
+    "Use a light dumbbell and squat only as low as comfortable.", "ਹਲਕਾ ਡੰਬਲ ਵਰਤੋ ਅਤੇ ਸਿਰਫ਼ ਆਰਾਮਦਾਇਕ ਹੱਦ ਤੱਕ ਹੇਠਾਂ ਜਾਓ।",
+    ["Hold one dumbbell close to the chest.", "Sit the hips back and bend the knees comfortably.", "Stand up smoothly while breathing out."],
+    ["ਇੱਕ ਡੰਬਲ ਛਾਤੀ ਦੇ ਨੇੜੇ ਫੜੋ।", "ਹਿੱਪ ਪਿੱਛੇ ਲੈ ਜਾ ਕੇ ਘੁੱਟਣੇ ਆਰਾਮ ਨਾਲ ਮੋੜੋ।", "ਸਾਹ ਬਾਹਰ ਕੱਢਦੇ ਹੋਏ ਹੌਲੀ ਖੜ੍ਹੋ।"],
+    { restEn: "90 sec", restPa: "90 ਸਕਿੰਟ" }
+  ),
+  "Seated Leg Curl": makeAlt(
+    "Lying Leg Curl", "ਲਾਇੰਗ ਲੈਗ ਕਰਲ", "images/exercises/lying-leg-curl.svg",
+    "10 reps", "10 ਰੈਪ",
+    "Keep the hips down and move slowly.", "ਹਿੱਪ ਹੇਠਾਂ ਰੱਖੋ ਅਤੇ ਹੌਲੀ ਮੂਵਮੈਂਟ ਕਰੋ।",
+    ["Lie face down and set the ankle pad comfortably.", "Curl the heels toward the body.", "Lower the weight slowly."],
+    ["ਮੂੰਹ ਹੇਠਾਂ ਲੇਟੋ ਅਤੇ ਐਂਕਲ ਪੈਡ ਆਰਾਮ ਨਾਲ ਸੈੱਟ ਕਰੋ।", "ਐੜੀਆਂ ਨੂੰ ਸਰੀਰ ਵੱਲ ਕਰਲ ਕਰੋ।", "ਵਜ਼ਨ ਹੌਲੀ ਹੇਠਾਂ ਲਿਆਓ।"],
+    { restEn: "60–75 sec", restPa: "60–75 ਸਕਿੰਟ" }
+  ),
+  "Leg Extension": makeAlt(
+    "Supported Step-Up", "ਸਹਾਰੇ ਨਾਲ ਸਟੈਪ-ਅੱਪ", null,
+    "8 each leg", "ਹਰ ਲੱਤ 8 ਰੈਪ",
+    "Use a low step and hold support.", "ਛੋਟਾ ਸਟੈਪ ਵਰਤੋ ਅਤੇ ਸਹਾਰਾ ਫੜੋ।",
+    ["Stand close to a low stable step.", "Hold a rail and step up with one foot.", "Step down slowly and repeat on the other leg."],
+    ["ਛੋਟੇ ਮਜ਼ਬੂਤ ਸਟੈਪ ਦੇ ਨੇੜੇ ਖੜ੍ਹੋ।", "ਰੇਲ ਫੜ ਕੇ ਇੱਕ ਪੈਰ ਨਾਲ ਉੱਪਰ ਚੜ੍ਹੋ।", "ਹੌਲੀ ਹੇਠਾਂ ਆਓ ਅਤੇ ਦੂਜੇ ਪੈਰ ਨਾਲ ਦੁਹਰਾਓ।"]
+  ),
+  "Standing Calf Raise": makeAlt(
+    "Seated Calf Raise", "ਸੀਟਡ ਕਾਫ਼ ਰੇਜ਼", "images/exercises/seated-calf-raise.svg",
+    "12–15 reps", "12–15 ਰੈਪ",
+    "Pause briefly at the top.", "ਉੱਪਰ ਇੱਕ ਪਲ ਰੁਕੋ।",
+    ["Sit with feet planted on the platform.", "Raise the heels slowly.", "Pause, then lower under control."],
+    ["ਪੈਰ ਪਲੇਟਫਾਰਮ ਤੇ ਰੱਖ ਕੇ ਬੈਠੋ।", "ਐੜੀਆਂ ਹੌਲੀ ਉੱਪਰ ਚੁੱਕੋ।", "ਇੱਕ ਪਲ ਰੁਕੋ ਅਤੇ ਕੰਟਰੋਲ ਨਾਲ ਹੇਠਾਂ ਲਿਆਓ।"]
+  ),
+  "Machine Shoulder Press": makeAlt(
+    "Seated Dumbbell Press", "ਸੀਟਡ ਡੰਬਲ ਪ੍ਰੈੱਸ", "images/exercises/seated-dumbbell-press.svg",
+    "10 reps", "10 ਰੈਪ",
+    "Use light dumbbells and keep the back supported.", "ਹਲਕੇ ਡੰਬਲ ਵਰਤੋ ਅਤੇ ਪਿੱਠ ਨੂੰ ਸਹਾਰਾ ਦਿਓ।",
+    ["Sit against a backrest with dumbbells near shoulder level.", "Press upward while breathing out.", "Lower slowly without forcing the shoulders."],
+    ["ਬੈਕਰੇਸਟ ਨਾਲ ਬੈਠੋ ਅਤੇ ਡੰਬਲ ਮੋਢਿਆਂ ਦੇ ਨੇੜੇ ਰੱਖੋ।", "ਸਾਹ ਬਾਹਰ ਕੱਢਦੇ ਹੋਏ ਉੱਪਰ ਪ੍ਰੈੱਸ ਕਰੋ।", "ਮੋਢਿਆਂ ਤੇ ਜ਼ੋਰ ਪਾਏ ਬਿਨਾਂ ਹੌਲੀ ਹੇਠਾਂ ਲਿਆਓ।"],
+    { restEn: "75–90 sec", restPa: "75–90 ਸਕਿੰਟ" }
+  ),
+  "Dumbbell Lateral Raise": makeAlt(
+    "Cable Lateral Raise", "ਕੇਬਲ ਲੈਟਰਲ ਰੇਜ਼", "images/exercises/cable-lateral-raise.svg",
+    "10–12 reps", "10–12 ਰੈਪ",
+    "Use light resistance and stop around shoulder height.", "ਹਲਕਾ ਰਜ਼ਿਸਟੈਂਸ ਵਰਤੋ ਅਤੇ ਮੋਢਿਆਂ ਦੇ ਲੈਵਲ ਦੇ ਨੇੜੇ ਰੁਕੋ।",
+    ["Stand side-on to a low cable.", "Raise the arm out to the side slowly.", "Lower under control and repeat on the other side."],
+    ["ਲੋ ਕੇਬਲ ਦੇ ਪਾਸੇ ਖੜ੍ਹੋ।", "ਬਾਂਹ ਨੂੰ ਹੌਲੀ ਪਾਸੇ ਵੱਲ ਚੁੱਕੋ।", "ਕੰਟਰੋਲ ਨਾਲ ਹੇਠਾਂ ਲਿਆਓ ਅਤੇ ਦੂਜੇ ਪਾਸੇ ਕਰੋ।"]
+  ),
+  "Reverse Pec Deck": makeAlt(
+    "Cable Rear-Delt Fly", "ਕੇਬਲ ਰੀਅਰ-ਡੈਲਟ ਫਲਾਈ", "images/exercises/cable-rear-delt-fly.svg",
+    "10–12 reps", "10–12 ਰੈਪ",
+    "Keep the weight light and shoulders relaxed.", "ਵਜ਼ਨ ਹਲਕਾ ਰੱਖੋ ਅਤੇ ਮੋਢੇ ਢਿੱਲੇ ਰੱਖੋ।",
+    ["Set the cables around shoulder height.", "Open the arms without arching the back.", "Return slowly."],
+    ["ਕੇਬਲ ਮੋਢਿਆਂ ਦੇ ਲੈਵਲ ਦੇ ਨੇੜੇ ਸੈੱਟ ਕਰੋ।", "ਪਿੱਠ ਨੂੰ ਵੱਧ ਮੋੜੇ ਬਿਨਾਂ ਬਾਂਹਾਂ ਖੋਲ੍ਹੋ।", "ਹੌਲੀ ਵਾਪਸ ਆਓ।"]
+  ),
+  "Dead Bug": makeAlt(
+    "Standing Pallof Press", "ਸਟੈਂਡਿੰਗ ਪੈਲੌਫ ਪ੍ਰੈੱਸ", "images/exercises/pallof-press.svg",
+    "8 each side", "ਹਰ ਪਾਸੇ 8 ਰੈਪ",
+    "Use light resistance and resist twisting.", "ਹਲਕਾ ਰਜ਼ਿਸਟੈਂਸ ਵਰਤੋ ਅਤੇ ਧੜ ਨੂੰ ਘੁੰਮਣ ਨਾ ਦਿਓ।",
+    ["Stand sideways to the cable with both hands at the chest.", "Press the hands straight forward.", "Hold the torso still, return slowly, then change sides."],
+    ["ਕੇਬਲ ਦੇ ਪਾਸੇ ਖੜ੍ਹ ਕੇ ਦੋਵੇਂ ਹੱਥ ਛਾਤੀ ਕੋਲ ਰੱਖੋ।", "ਹੱਥ ਸਿੱਧੇ ਅੱਗੇ ਧੱਕੋ।", "ਧੜ ਸਥਿਰ ਰੱਖੋ, ਹੌਲੀ ਵਾਪਸ ਆਓ ਅਤੇ ਪਾਸਾ ਬਦਲੋ।"]
+  ),
+  "Hammer Curl": makeAlt(
+    "Rope Hammer Curl", "ਰੋਪ ਹੈਮਰ ਕਰਲ", "images/exercises/rope-hammer-curl.svg",
+    "10 reps", "10 ਰੈਪ",
+    "Keep the elbows still and wrists neutral.", "ਕੋਹਣੀਆਂ ਸਥਿਰ ਅਤੇ ਕਲਾਈ ਸਿੱਧੀ ਰੱਖੋ।",
+    ["Hold the rope ends with neutral wrists.", "Curl toward the shoulders without swinging.", "Lower slowly."],
+    ["ਰੋਪ ਦੇ ਸਿਰੇ ਫੜੋ ਅਤੇ ਕਲਾਈ ਸਿੱਧੀ ਰੱਖੋ।", "ਬਿਨਾਂ ਝੁਲਾਏ ਮੋਢਿਆਂ ਵੱਲ ਕਰਲ ਕਰੋ।", "ਹੌਲੀ ਹੇਠਾਂ ਲਿਆਓ।"]
+  )
+};
+
+const exerciseVariantState = {};
+
+function variantStateKey(dayIndex, exerciseIndex) {
+  return `${dayIndex}-${exerciseIndex}`;
 }
 
-function startExerciseAnimations() {
-  stopExerciseAnimations();
+function getDisplayedExercise(baseExercise, exerciseIndex) {
+  const alt = ALTERNATE_EXERCISES[baseExercise.name.en];
+  const usingAlt = exerciseVariantState[variantStateKey(selectedDay, exerciseIndex)] === "alternate";
 
-  const images = Array.from(document.querySelectorAll(".exercise-demo-image"));
-  if (!images.length) return;
+  if (alt && usingAlt) return alt;
 
-  const reduceMotion = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduceMotion) return;
-
-  let sequenceIndex = 0;
-  exerciseAnimationTimer = setInterval(() => {
-    sequenceIndex = (sequenceIndex + 1) % EXERCISE_FRAME_SEQUENCE.length;
-    const frame = EXERCISE_FRAME_SEQUENCE[sequenceIndex];
-
-    images.forEach(img => {
-      img.src = exerciseFrameUrl(img.dataset.exerciseSlug, frame);
-    });
-  }, 750);
+  return {
+    ...baseExercise,
+    image: PRIMARY_IMAGES[baseExercise.name.en] || "images/exercises/placeholder.svg"
+  };
 }
 
 const workouts = [
@@ -599,6 +779,7 @@ const els = {
   muscle: document.getElementById("muscleGroup"),
   message: document.getElementById("dayMessage"),
   emoji: document.getElementById("heroEmoji"),
+  muscleImage: document.getElementById("muscleHighlightImage"),
   warmups: document.getElementById("warmupList"),
   exercises: document.getElementById("exerciseList"),
   stretches: document.getElementById("stretchList"),
@@ -651,9 +832,9 @@ function formatHistoryDate(value) {
   }).format(date);
 }
 
-function updateExerciseHistoryIfComplete(exercise, exerciseIndex) {
+function updateExerciseHistoryIfComplete(exercise) {
   const allComplete = Array.from({ length: exercise.sets }, (_, setIndex) => {
-    const key = storageKey(selectedDay, `exercise-${exerciseIndex}`, setIndex + 1);
+    const key = storageKey(selectedDay, `exercise-${exerciseId(exercise)}`, setIndex + 1);
     return localStorage.getItem(key) === "1";
   }).every(Boolean);
 
@@ -744,15 +925,26 @@ function render() {
   els.message.textContent = tx(workout.message);
   els.emoji.textContent = workout.emoji;
 
+  els.muscleImage.src =
+    MUSCLE_IMAGES[workout.muscle.en] || "images/muscles/recovery.svg";
+  els.muscleImage.alt =
+    currentLang === "pa"
+      ? `${tx(workout.muscle)} — ਅੱਜ ਦੇ ਮੁੱਖ ਮਾਸਪੇਸ਼ੀ ਹਿੱਸੇ`
+      : `${tx(workout.muscle)} — today's target muscle areas`;
+
   els.warmups.innerHTML = "";
   workout.warmup.forEach((item, i) => {
     els.warmups.appendChild(makeCheckRow(item, storageKey(selectedDay, "warmup", i)));
   });
 
-  stopExerciseAnimations();
   els.exercises.innerHTML = "";
 
-  workout.exercises.forEach((exercise, i) => {
+  workout.exercises.forEach((baseExercise, i) => {
+    const exercise = getDisplayedExercise(baseExercise, i);
+    const altAvailable = !!ALTERNATE_EXERCISES[baseExercise.name.en];
+    const stateKey = variantStateKey(selectedDay, i);
+    const usingAlt = exerciseVariantState[stateKey] === "alternate";
+
     const card = document.createElement("article");
     card.className = "exercise-card";
 
@@ -762,34 +954,18 @@ function render() {
     const media = document.createElement("div");
     media.className = "exercise-media";
 
-    const mediaSlug = EXERCISE_MEDIA[exercise.name.en];
+    const img = document.createElement("img");
+    img.className = "exercise-demo-image";
+    img.src = exercise.image || "images/exercises/placeholder.svg";
+    img.alt = tx(exercise.name);
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.addEventListener("error", () => {
+      img.onerror = null;
+      img.src = "images/exercises/placeholder.svg";
+    });
 
-    if (mediaSlug) {
-      const mediaLabel = document.createElement("span");
-      mediaLabel.className = "exercise-media-label";
-      mediaLabel.textContent = `▶ ${t.demo}`;
-
-      const img = document.createElement("img");
-      img.className = "exercise-demo-image";
-      img.dataset.exerciseSlug = mediaSlug;
-      img.src = exerciseFrameUrl(mediaSlug, 1);
-      img.alt = `${tx(exercise.name)} — ${t.demo}`;
-      img.loading = "lazy";
-      img.decoding = "async";
-      img.addEventListener("error", () => {
-        media.classList.add("exercise-media--missing");
-        media.innerHTML = `<span class="exercise-media-missing">🏋️ ${t.visualUnavailable}</span>`;
-      }, { once: true });
-
-      media.append(img, mediaLabel);
-    } else {
-      media.classList.add("exercise-media--missing");
-      const missing = document.createElement("span");
-      missing.className = "exercise-media-missing";
-      missing.textContent = `🏋️ ${t.visualUnavailable}`;
-      media.appendChild(missing);
-    }
-
+    media.appendChild(img);
     main.appendChild(media);
 
     const top = document.createElement("div");
@@ -835,11 +1011,17 @@ function render() {
       const input = document.createElement("input");
       input.type = "checkbox";
 
-      const key = storageKey(selectedDay, `exercise-${i}`, setNo);
+      const key = storageKey(
+        selectedDay,
+        `exercise-${exerciseId(exercise)}`,
+        setNo
+      );
+
       input.checked = localStorage.getItem(key) === "1";
+
       input.addEventListener("change", () => {
         localStorage.setItem(key, input.checked ? "1" : "0");
-        updateExerciseHistoryIfComplete(exercise, i);
+        updateExerciseHistoryIfComplete(exercise);
       });
 
       const span = document.createElement("span");
@@ -853,18 +1035,29 @@ function render() {
 
     const how = document.createElement("details");
     how.className = "how";
-    const howList = exercise.how.map(step => `<li>${tx(step)}</li>`).join("");
+    const howList = exercise.how
+      .map(step => `<li>${tx(step)}</li>`)
+      .join("");
     how.innerHTML = `<summary>ℹ️ ${t.showHow}</summary><ol>${howList}</ol>`;
 
-    const alt = document.createElement("details");
-    alt.className = "alt";
-    alt.innerHTML = `<summary>↪ ${t.alternative}</summary><p>${tx(exercise.alt)}</p>`;
+    if (altAvailable) {
+      const switchBtn = document.createElement("button");
+      switchBtn.type = "button";
+      switchBtn.className = "switch-exercise-btn";
+      switchBtn.textContent = usingAlt ? t.showMain : t.switchAlternative;
 
-    card.append(main, how, alt);
+      switchBtn.addEventListener("click", () => {
+        exerciseVariantState[stateKey] = usingAlt ? "main" : "alternate";
+        render();
+      });
+
+      card.append(main, switchBtn, how);
+    } else {
+      card.append(main, how);
+    }
+
     els.exercises.appendChild(card);
   });
-
-  startExerciseAnimations();
 
   els.count.textContent = `${workout.exercises.length} ${t.exercisesCount}`;
 
