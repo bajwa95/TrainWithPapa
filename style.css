@@ -570,3 +570,11 @@ body[data-lang="pa"] .eyebrow {
     max-height: 74vh;
   }
 }
+
+
+.lightbox-status {
+  margin: 5px 46px 0 4px;
+  color: #475569;
+  font-size: .84rem;
+  font-weight: 750;
+}
