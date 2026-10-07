@@ -912,6 +912,32 @@ function renderTabs() {
   });
 }
 
+function openImageLightbox(src, caption) {
+  const dialog = document.getElementById("imageLightbox");
+  const image = document.getElementById("lightboxImage");
+  const label = document.getElementById("lightboxCaption");
+
+  image.src = src;
+  image.alt = caption;
+  label.textContent = caption;
+
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute("open", "");
+  }
+}
+
+function closeImageLightbox() {
+  const dialog = document.getElementById("imageLightbox");
+
+  if (typeof dialog.close === "function" && dialog.open) {
+    dialog.close();
+  } else {
+    dialog.removeAttribute("open");
+  }
+}
+
 function render() {
   renderStaticText();
 
@@ -931,6 +957,20 @@ function render() {
     currentLang === "pa"
       ? `${tx(workout.muscle)} — ਅੱਜ ਦੇ ਮੁੱਖ ਮਾਸਪੇਸ਼ੀ ਹਿੱਸੇ`
       : `${tx(workout.muscle)} — today's target muscle areas`;
+  els.muscleImage.classList.add("zoomable-image");
+  els.muscleImage.tabIndex = 0;
+  els.muscleImage.setAttribute("role", "button");
+  els.muscleImage.setAttribute(
+    "aria-label",
+    currentLang === "pa" ? "ਮਾਸਪੇਸ਼ੀਆਂ ਦੀ ਵੱਡੀ ਤਸਵੀਰ ਵੇਖੋ" : "View larger muscle image"
+  );
+  els.muscleImage.onclick = () => openImageLightbox(els.muscleImage.src, tx(workout.muscle));
+  els.muscleImage.onkeydown = event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openImageLightbox(els.muscleImage.src, tx(workout.muscle));
+    }
+  };
 
   els.warmups.innerHTML = "";
   workout.warmup.forEach((item, i) => {
@@ -960,6 +1000,20 @@ function render() {
     img.alt = tx(exercise.name);
     img.loading = "lazy";
     img.decoding = "async";
+    img.classList.add("zoomable-image");
+    img.tabIndex = 0;
+    img.setAttribute("role", "button");
+    img.setAttribute("aria-label", `${tx(exercise.name)} — ${currentLang === "pa" ? "ਵੱਡੀ ਤਸਵੀਰ ਵੇਖੋ" : "view larger image"}`);
+
+    const openExerciseImage = () => openImageLightbox(img.src, tx(exercise.name));
+    img.addEventListener("click", openExerciseImage);
+    img.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openExerciseImage();
+      }
+    });
+
     img.addEventListener("error", () => {
       img.onerror = null;
       img.src = "images/exercises/placeholder.svg";
@@ -1098,6 +1152,12 @@ els.finish.addEventListener("click", () => {
   if (complete) {
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   }
+});
+
+document.getElementById("closeLightbox").addEventListener("click", closeImageLightbox);
+
+document.getElementById("imageLightbox").addEventListener("click", event => {
+  if (event.target === event.currentTarget) closeImageLightbox();
 });
 
 render();
