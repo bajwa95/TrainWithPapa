@@ -363,3 +363,71 @@ body[data-lang="pa"] .eyebrow {
   font-weight: 750;
   border: 1px solid var(--line);
 }
+
+
+.exercise-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #111827;
+  border: 1px solid #243044;
+}
+
+.exercise-demo-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.exercise-media-label {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  color: #172033;
+  font-size: .75rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.exercise-media--missing {
+  min-height: 130px;
+  aspect-ratio: auto;
+  background: #f8fafc;
+  border-color: var(--line);
+}
+
+.exercise-media-missing {
+  padding: 20px;
+  color: var(--muted);
+  text-align: center;
+  font-size: .9rem;
+  font-weight: 750;
+}
+
+.asset-credit {
+  max-width: 620px;
+  margin: 8px auto 0;
+  font-size: .72rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.asset-credit a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exercise-media-label::before {
+    content: "";
+  }
+}
