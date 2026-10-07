@@ -352,3 +352,14 @@ body[data-lang="pa"] .eyebrow {
   .header-row { gap: 10px; }
   .language-toggle { min-width: 82px; padding-inline: 10px; }
 }
+
+.exercise-history {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 750;
+  border: 1px solid var(--line);
+}
