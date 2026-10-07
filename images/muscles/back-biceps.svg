@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+  <rect width="320" height="240" rx="28" fill="#f8fafc"/>
+  
+    <circle cx="160" cy="43" r="25" fill="#d1d5db"/>
+    <rect x="140" y="70" width="40" height="74" rx="20" fill="#cbd5e1"/>
+    <rect x="105" y="76" width="34" height="90" rx="17" fill="#cbd5e1"/>
+    <rect x="181" y="76" width="34" height="90" rx="17" fill="#cbd5e1"/>
+    <rect x="137" y="140" width="20" height="72" rx="10" fill="#cbd5e1"/>
+    <rect x="163" y="140" width="20" height="72" rx="10" fill="#cbd5e1"/>
+  
+  
+    <path d="M142 82 Q160 72 178 82 L176 120 Q160 136 144 120 Z" fill="#ef4444"/>
+    <rect x="108" y="90" width="28" height="34" rx="14" fill="#f97316"/>
+    <rect x="184" y="90" width="28" height="34" rx="14" fill="#f97316"/>
+  
+  <text x="160" y="230" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#475569">Back + Biceps</text>
+</svg>
