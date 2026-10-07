@@ -40,7 +40,8 @@ The language can be changed with one large button and the choice is remembered o
 - Large mobile-friendly controls
 - Set-by-set checkboxes
 - Last-performed date stored automatically for each exercise
-- Animated in-card exercise demonstrations for matched movements
+- Local exercise SVGs stored in this repository for reliable visual guidance
+- One-tap main / alternate exercise switching, including image, instructions, reps, and history
 - Workout completion button
 - Progress and language choice stored locally
 - No account or database required
@@ -72,6 +73,6 @@ Made with ❤️ for Papa.
 
 Exercise illustrations are provided by the open-source [Workout Guide](https://github.com/bryllim/workout-guide) project by Bryl Lim, based in part on artwork by Everkinetic.
 
-The visual assets are licensed under **CC BY-SA 4.0**. TrainWithPapa loads the three published SVG frames for matched exercises and cycles them in the exercise card to create a lightweight demonstration animation.
+The visual assets are licensed under **CC BY-SA 4.0**. Reviewed matching SVG illustrations are copied into this repository so the workout page does not depend on third-party image URLs at runtime.
 
-Exercises without an exact reviewed visual match intentionally show a placeholder rather than an incorrect demonstration.
+Exercises without an exact reviewed visual match intentionally show a local placeholder rather than an incorrect demonstration.
