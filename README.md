@@ -42,6 +42,7 @@ The language can be changed with one large button and the choice is remembered o
 - Last-performed date stored automatically for each exercise
 - Local exercise SVGs stored in this repository for reliable visual guidance
 - One-tap main / alternate exercise switching, including image, instructions, reps, and history
+- Tap an exercise illustration to enlarge it and play a local three-frame movement animation
 - Workout completion button
 - Progress and language choice stored locally
 - No account or database required
