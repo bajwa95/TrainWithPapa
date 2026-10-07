@@ -522,7 +522,7 @@ const workouts = [
 ];
 
 let selectedDay = new Date().getDay();
-let currentLang = localStorage.getItem("trainWithPapa-language") || "en";
+let currentLang = localStorage.getItem("trainWithPapa-language") || "pa";
 
 const els = {
   date: document.getElementById("todayDate"),
