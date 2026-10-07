@@ -18,6 +18,8 @@ const ui = {
     exercisesCount: "exercises",
     lastDone: "Last done",
     neverDone: "Not done yet",
+    demo: "Exercise demo",
+    visualUnavailable: "Demo not available yet",
     done: "✓ Workout Done",
     completed: "✓ Workout Completed",
     doneMessage: "Great work, Papa! 👏 See you next workout.",
@@ -43,6 +45,8 @@ const ui = {
     exercisesCount: "ਕਸਰਤਾਂ",
     lastDone: "ਪਿਛਲੀ ਵਾਰ",
     neverDone: "ਹਾਲੇ ਨਹੀਂ ਕੀਤੀ",
+    demo: "ਕਸਰਤ ਦੀ ਚਲਦੀ ਤਸਵੀਰ",
+    visualUnavailable: "ਇਸ ਕਸਰਤ ਦੀ ਤਸਵੀਰ ਹਾਲੇ ਉਪਲਬਧ ਨਹੀਂ",
     done: "✓ ਕਸਰਤ ਪੂਰੀ",
     completed: "✓ ਅੱਜ ਦੀ ਕਸਰਤ ਹੋ ਗਈ",
     doneMessage: "ਸ਼ਾਬਾਸ਼ ਪਾਪਾ! 👏 ਅਗਲੀ ਕਸਰਤ ਵਿੱਚ ਮਿਲਦੇ ਹਾਂ।",
@@ -50,6 +54,66 @@ const ui = {
     switchLanguage: "English"
   }
 };
+
+const EXERCISE_MEDIA = {
+  "Easy Walk": "walking",
+  "Comfortable Walk": "walking",
+  "Machine Chest Press": "machine-chest-press",
+  "Pec Deck / Chest Fly": "pec-deck",
+  "Rope Triceps Pushdown": "rope-tricep-pushdown",
+  "Lat Pulldown": "lat-pulldown",
+  "Seated Cable Row": "seated-row",
+  "Chest-Supported Row": "chest-supported-row",
+  "Cable Biceps Curl": "cable-curl",
+  "Leg Press": "leg-press",
+  "Seated Leg Curl": "seated-leg-curl",
+  "Leg Extension": "leg-extension",
+  "Standing Calf Raise": "standing-calf-raise",
+  "Machine Shoulder Press": "machine-shoulder-press",
+  "Dumbbell Lateral Raise": "lateral-raise",
+  "Reverse Pec Deck": "reverse-pec-deck",
+  "Dead Bug": "dead-bug",
+  "Hammer Curl": "hammer-curl"
+};
+
+const EXERCISE_MEDIA_BASE =
+  "https://cdn.jsdelivr.net/npm/@bryllim/workout-guide@1.0.0/assets";
+
+const EXERCISE_FRAME_SEQUENCE = [1, 2, 3, 2];
+let exerciseAnimationTimer = null;
+
+function exerciseFrameUrl(slug, frame) {
+  return `${EXERCISE_MEDIA_BASE}/${slug}/frame-${frame}.svg`;
+}
+
+function stopExerciseAnimations() {
+  if (exerciseAnimationTimer) {
+    clearInterval(exerciseAnimationTimer);
+    exerciseAnimationTimer = null;
+  }
+}
+
+function startExerciseAnimations() {
+  stopExerciseAnimations();
+
+  const images = Array.from(document.querySelectorAll(".exercise-demo-image"));
+  if (!images.length) return;
+
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduceMotion) return;
+
+  let sequenceIndex = 0;
+  exerciseAnimationTimer = setInterval(() => {
+    sequenceIndex = (sequenceIndex + 1) % EXERCISE_FRAME_SEQUENCE.length;
+    const frame = EXERCISE_FRAME_SEQUENCE[sequenceIndex];
+
+    images.forEach(img => {
+      img.src = exerciseFrameUrl(img.dataset.exerciseSlug, frame);
+    });
+  }, 750);
+}
 
 const workouts = [
   {
@@ -685,6 +749,7 @@ function render() {
     els.warmups.appendChild(makeCheckRow(item, storageKey(selectedDay, "warmup", i)));
   });
 
+  stopExerciseAnimations();
   els.exercises.innerHTML = "";
 
   workout.exercises.forEach((exercise, i) => {
@@ -693,6 +758,39 @@ function render() {
 
     const main = document.createElement("div");
     main.className = "exercise-main";
+
+    const media = document.createElement("div");
+    media.className = "exercise-media";
+
+    const mediaSlug = EXERCISE_MEDIA[exercise.name.en];
+
+    if (mediaSlug) {
+      const mediaLabel = document.createElement("span");
+      mediaLabel.className = "exercise-media-label";
+      mediaLabel.textContent = `▶ ${t.demo}`;
+
+      const img = document.createElement("img");
+      img.className = "exercise-demo-image";
+      img.dataset.exerciseSlug = mediaSlug;
+      img.src = exerciseFrameUrl(mediaSlug, 1);
+      img.alt = `${tx(exercise.name)} — ${t.demo}`;
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.addEventListener("error", () => {
+        media.classList.add("exercise-media--missing");
+        media.innerHTML = `<span class="exercise-media-missing">🏋️ ${t.visualUnavailable}</span>`;
+      }, { once: true });
+
+      media.append(img, mediaLabel);
+    } else {
+      media.classList.add("exercise-media--missing");
+      const missing = document.createElement("span");
+      missing.className = "exercise-media-missing";
+      missing.textContent = `🏋️ ${t.visualUnavailable}`;
+      media.appendChild(missing);
+    }
+
+    main.appendChild(media);
 
     const top = document.createElement("div");
     top.className = "exercise-top";
@@ -765,6 +863,8 @@ function render() {
     card.append(main, how, alt);
     els.exercises.appendChild(card);
   });
+
+  startExerciseAnimations();
 
   els.count.textContent = `${workout.exercises.length} ${t.exercisesCount}`;
 
