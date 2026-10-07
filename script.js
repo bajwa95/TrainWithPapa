@@ -16,6 +16,8 @@ const ui = {
     set: "SET",
     rest: "rest",
     exercisesCount: "exercises",
+    lastDone: "Last done",
+    neverDone: "Not done yet",
     done: "✓ Workout Done",
     completed: "✓ Workout Completed",
     doneMessage: "Great work, Papa! 👏 See you next workout.",
@@ -39,6 +41,8 @@ const ui = {
     set: "ਸੈੱਟ",
     rest: "ਆਰਾਮ",
     exercisesCount: "ਕਸਰਤਾਂ",
+    lastDone: "ਪਿਛਲੀ ਵਾਰ",
+    neverDone: "ਹਾਲੇ ਨਹੀਂ ਕੀਤੀ",
     done: "✓ ਕਸਰਤ ਪੂਰੀ",
     completed: "✓ ਅੱਜ ਦੀ ਕਸਰਤ ਹੋ ਗਈ",
     doneMessage: "ਸ਼ਾਬਾਸ਼ ਪਾਪਾ! 👏 ਅਗਲੀ ਕਸਰਤ ਵਿੱਚ ਮਿਲਦੇ ਹਾਂ।",
@@ -552,6 +556,56 @@ function storageKey(dayIndex, type, index = "") {
   return `trainWithPapa-${weekId}-${dayIndex}-${type}-${index}`;
 }
 
+function exerciseId(exercise) {
+  return exercise.name.en
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function exerciseHistoryKey(exercise) {
+  return `trainWithPapa-lastDone-${exerciseId(exercise)}`;
+}
+
+function localDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatHistoryDate(value) {
+  if (!value) return null;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  return new Intl.DateTimeFormat(currentLang === "pa" ? "pa-IN" : "en-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+}
+
+function updateExerciseHistoryIfComplete(exercise, exerciseIndex) {
+  const allComplete = Array.from({ length: exercise.sets }, (_, setIndex) => {
+    const key = storageKey(selectedDay, `exercise-${exerciseIndex}`, setIndex + 1);
+    return localStorage.getItem(key) === "1";
+  }).every(Boolean);
+
+  if (!allComplete) return;
+
+  localStorage.setItem(exerciseHistoryKey(exercise), localDateString());
+
+  const historyEl = document.querySelector(
+    `[data-history-id="${exerciseId(exercise)}"]`
+  );
+
+  if (historyEl) {
+    historyEl.textContent = `📅 ${ui[currentLang].lastDone}: ${formatHistoryDate(localDateString())}`;
+  }
+}
+
 function makeCheckRow(item, key) {
   const label = document.createElement("label");
   label.className = "simple-row";
@@ -662,6 +716,17 @@ function render() {
     `;
     main.appendChild(meta);
 
+    const history = document.createElement("div");
+    history.className = "exercise-history";
+    history.dataset.historyId = exerciseId(exercise);
+
+    const lastDoneValue = localStorage.getItem(exerciseHistoryKey(exercise));
+    history.textContent = lastDoneValue
+      ? `📅 ${t.lastDone}: ${formatHistoryDate(lastDoneValue)}`
+      : `📅 ${t.neverDone}`;
+
+    main.appendChild(history);
+
     const sets = document.createElement("div");
     sets.className = "sets";
 
@@ -674,7 +739,10 @@ function render() {
 
       const key = storageKey(selectedDay, `exercise-${i}`, setNo);
       input.checked = localStorage.getItem(key) === "1";
-      input.addEventListener("change", () => localStorage.setItem(key, input.checked ? "1" : "0"));
+      input.addEventListener("change", () => {
+        localStorage.setItem(key, input.checked ? "1" : "0");
+        updateExerciseHistoryIfComplete(exercise, i);
+      });
 
       const span = document.createElement("span");
       span.textContent = `${t.set} ${setNo}`;
