@@ -912,14 +912,79 @@ function renderTabs() {
   });
 }
 
-function openImageLightbox(src, caption) {
+let lightboxAnimationTimer = null;
+
+function stopLightboxAnimation() {
+  if (lightboxAnimationTimer) {
+    clearInterval(lightboxAnimationTimer);
+    lightboxAnimationTimer = null;
+  }
+}
+
+function getExerciseAnimationFrames(localPath) {
+  if (!localPath) return null;
+
+  const match = localPath.match(/^images\/exercises\/([a-z0-9-]+)\.svg$/);
+  if (!match || match[1] === "placeholder") return null;
+
+  const slug = match[1];
+
+  return [
+    `images/exercises/frames/${slug}-1.svg`,
+    `images/exercises/${slug}.svg`,
+    `images/exercises/frames/${slug}-3.svg`,
+    `images/exercises/${slug}.svg`
+  ];
+}
+
+function openImageLightbox(src, caption, localPath = null) {
   const dialog = document.getElementById("imageLightbox");
   const image = document.getElementById("lightboxImage");
   const label = document.getElementById("lightboxCaption");
+  const status = document.getElementById("lightboxStatus");
+
+  stopLightboxAnimation();
 
   image.src = src;
   image.alt = caption;
   label.textContent = caption;
+  status.textContent = "";
+
+  const frames = getExerciseAnimationFrames(localPath);
+  const reduceMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (frames && !reduceMotion) {
+    frames.forEach(frameSrc => {
+      const preload = new Image();
+      preload.src = frameSrc;
+    });
+
+    let frameIndex = 0;
+    image.src = frames[frameIndex];
+
+    status.textContent =
+      currentLang === "pa"
+        ? "▶ ਕਸਰਤ ਦੀ ਪੂਰੀ ਮੂਵਮੈਂਟ"
+        : "▶ Full movement preview";
+
+    lightboxAnimationTimer = setInterval(() => {
+      frameIndex = (frameIndex + 1) % frames.length;
+      image.src = frames[frameIndex];
+    }, 700);
+  } else if (frames) {
+    status.textContent =
+      currentLang === "pa"
+        ? "ਤਸਵੀਰ — ਮੂਵਮੈਂਟ ਐਨੀਮੇਸ਼ਨ ਬੰਦ ਹੈ"
+        : "Static view — motion animation is disabled";
+  }
+
+  image.onerror = () => {
+    stopLightboxAnimation();
+    image.onerror = null;
+    image.src = src;
+    status.textContent = "";
+  };
 
   if (typeof dialog.showModal === "function") {
     dialog.showModal();
@@ -929,6 +994,8 @@ function openImageLightbox(src, caption) {
 }
 
 function closeImageLightbox() {
+  stopLightboxAnimation();
+
   const dialog = document.getElementById("imageLightbox");
 
   if (typeof dialog.close === "function" && dialog.open) {
@@ -1005,7 +1072,7 @@ function render() {
     img.setAttribute("role", "button");
     img.setAttribute("aria-label", `${tx(exercise.name)} — ${currentLang === "pa" ? "ਵੱਡੀ ਤਸਵੀਰ ਵੇਖੋ" : "view larger image"}`);
 
-    const openExerciseImage = () => openImageLightbox(img.src, tx(exercise.name));
+    const openExerciseImage = () => openImageLightbox(img.src, tx(exercise.name), exercise.image);
     img.addEventListener("click", openExerciseImage);
     img.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
@@ -1158,6 +1225,10 @@ document.getElementById("closeLightbox").addEventListener("click", closeImageLig
 
 document.getElementById("imageLightbox").addEventListener("click", event => {
   if (event.target === event.currentTarget) closeImageLightbox();
+});
+
+document.getElementById("imageLightbox").addEventListener("cancel", () => {
+  stopLightboxAnimation();
 });
 
 render();
